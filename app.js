@@ -22,7 +22,7 @@ const FIELDS = [
   {id:'goal',kind:'Objetivo',title:'O que você quer que a pessoa faça?',help:'Qual é a principal ação que a página deve incentivar?',options:['Chamar no WhatsApp','Pedir orçamento','Agendar horário','Comprar agora','Preencher um formulário','Solicitar uma ligação','Conhecer os serviços','Fazer um cadastro','Baixar um material','Visitar o local']},
   {id:'offer',kind:'Oferta',title:'O que você quer apresentar?',help:'A lista muda em alguns nichos, mas sempre mantém 10 caminhos distintos.',options:['Serviço principal','Consulta inicial','Produto em destaque','Plano recorrente','Avaliação personalizada','Orçamento sob medida','Demonstração prática','Condição promocional','Pacote completo','Evento especial']},
   {id:'audience',kind:'Público',title:'Quem você quer atrair?',help:'Escolha o público que mais se parece com o seu cliente ideal.',options:['Público geral','Empresas locais','Famílias','Jovens adultos','Profissionais liberais','Pequenas empresas','Grandes empresas','Moradores da região','Clientes de alto padrão','Público especializado']},
-  {id:'color',kind:'Identidade visual',title:'Qual cor combina mais com sua marca?',help:'Escolha uma das 10 famílias. Depois você pode ajustar livremente pelo seletor ou HEX.',options:COLOR_OPTIONS.map(x=>x.label)},
+  {id:'vibe',kind:'Estilo da página',title:'Que sensação a página deve passar?',help:'Esta escolha muda composição, formas e ritmo visual. A cor será escolhida livremente depois.',options:['Profissional','Moderna','Elegante','Minimalista','Premium','Acolhedora','Forte','Tecnológica','Tradicional','Descontraída']},
   {id:'convince',kind:'Argumento',title:'O que mais convence seus clientes?',help:'Isso muda a forma como os argumentos são apresentados.',options:['Economia','Qualidade percebida','Experiência comprovada','Resultados mensuráveis','Opinião de clientes','Rapidez no atendimento','Segurança no processo','Atendimento próximo','Exclusividade','Facilidade para começar']},
   {id:'first',kind:'Primeira impressão',title:'O que deve chamar atenção primeiro?',help:'Cada opção usa uma abertura visual diferente — não apenas outro texto.',options:['Marca em destaque','Serviço em destaque','Oferta promocional','Número ou resultado','Imagem protagonista','Frase de impacto','Benefício principal','Problema do cliente','Oferta completa','Contato imediato']},
   {id:'depth',kind:'Quantidade de conteúdo',title:'Quanto você quer explicar?',help:'Cada nível tem composição e profundidade próprias.',options:['Essencial','Muito curta','Curta com respostas','Objetiva','Média com prova','Média detalhada','Longa organizada','Longa por serviços','História da empresa','Página completa']},
@@ -242,6 +242,19 @@ const audienceRenderers = Array.from({length:10},(_,i)=>(L)=>{
   return '<section class="lp-section alt audience-v'+(i+1)+'"><div class="lp-wrap"><div class="lp-overline">Feito para '+escapeHTML(L[3])+'</div><h2 class="lp-h2">Uma abordagem pensada para esse público</h2><p class="lp-section-lead">O caminho '+escapeHTML(forms[i])+' diferencia esta opção das demais sem depender apenas do rótulo da pergunta.</p><div class="audience-shape audience-shape-'+(i+1)+'"></div></div></section>';
 });
 
+const vibeRenderers = [
+  ()=>'<section class="lp-section vibe-block vibe-v1"><div class="lp-wrap"><div class="lp-overline">Profissional</div><h2 class="lp-h2">Clareza, ordem e confiança</h2><div class="lp-cards"><div class="lp-card"><strong>Objetivo</strong><p>Informação organizada sem excesso visual.</p></div><div class="lp-card"><strong>Consistente</strong><p>Hierarquia clara em toda a página.</p></div></div></div></section>',
+  ()=>'<section class="lp-section alt vibe-block vibe-v2"><div class="lp-wrap"><div class="lp-overline">Moderna</div><h2 class="lp-h2">Blocos mais vivos e ritmo contemporâneo</h2><div class="vibe-bars"><i></i><i></i><i></i></div></div></section>',
+  ()=>'<section class="lp-section vibe-block vibe-v3"><div class="lp-wrap lp-center"><div class="lp-overline">Elegante</div><h2 class="lp-h2">Mais espaço. Menos ruído.</h2><p class="lp-section-lead">Uma composição com respiro e foco tipográfico.</p></div></section>',
+  ()=>'<section class="lp-section alt vibe-block vibe-v4"><div class="lp-wrap"><div class="lp-overline">Minimalista</div><h2 class="lp-h2">Só o essencial na tela</h2><div class="vibe-rule"></div></div></section>',
+  ()=>'<section class="lp-section vibe-block vibe-v5"><div class="lp-wrap"><div class="lp-overline">Premium</div><h2 class="lp-h2">Apresentação com percepção de valor</h2><div class="proof-badges"><span>SELEÇÃO</span><span>ATENÇÃO</span><span>DETALHE</span></div></div></section>',
+  ()=>'<section class="lp-section alt vibe-block vibe-v6"><div class="lp-wrap"><div class="lp-overline">Acolhedora</div><h2 class="lp-h2">Uma página que parece conversa</h2><p class="lp-section-lead">Formas suaves, leitura confortável e comunicação próxima.</p></div></section>',
+  ()=>'<section class="lp-section vibe-block vibe-v7"><div class="lp-wrap"><div class="lp-overline">Forte</div><h2 class="lp-h2">Contraste alto. Mensagem direta.</h2><div class="vibe-stripe"></div></div></section>',
+  ()=>'<section class="lp-section alt vibe-block vibe-v8"><div class="lp-wrap"><div class="lp-overline">Tecnológica</div><h2 class="lp-h2">Estrutura modular e sinais digitais</h2><div class="vibe-grid"><i></i><i></i><i></i><i></i></div></div></section>',
+  ()=>'<section class="lp-section vibe-block vibe-v9"><div class="lp-wrap"><div class="lp-overline">Tradicional</div><h2 class="lp-h2">Familiar, sóbria e fácil de reconhecer</h2><p class="lp-section-lead">Hierarquia convencional para transmitir estabilidade.</p></div></section>',
+  ()=>'<section class="lp-section alt vibe-block vibe-v10"><div class="lp-wrap"><div class="lp-overline">Descontraída</div><h2 class="lp-h2">Leveza sem perder clareza</h2><div class="vibe-bubbles"><i></i><i></i><i></i></div></div></section>'
+];
+
 const convinceRenderers = [
   (L)=>'<section class="lp-section convince-v1"><div class="lp-wrap"><div class="lp-overline">Economia</div><h2 class="lp-h2">Mostre o valor antes do preço</h2><div class="lp-compare"><div><h3>Custo de continuar igual</h3><ul><li>Tempo perdido</li><li>Retrabalho</li><li>Oportunidade perdida</li></ul></div><div class="good"><h3>Valor da mudança</h3><ul><li>Mais previsibilidade</li><li>Menos desperdício</li><li>Decisão mais simples</li></ul></div></div></div></section>',
   (L)=>'<section class="lp-section alt convince-v2"><div class="lp-wrap lp-center"><div class="lp-overline">Qualidade percebida</div><h2 class="lp-h2">Detalhes que sustentam uma escolha melhor</h2><p class="lp-section-lead">Materiais, método, cuidado e acabamento ganham destaque nesta composição.</p></div></section>',
@@ -335,10 +348,7 @@ function renderFieldContribution(fieldIndex,optionIndex,baseConfig){
   if(fieldIndex===1)return goalRenderers[optionIndex](labels,vars);
   if(fieldIndex===2)return offerRenderers[optionIndex](labels,vars);
   if(fieldIndex===3)return audienceRenderers[optionIndex](labels,vars);
-  if(fieldIndex===4){
-    const p=palette(COLOR_OPTIONS[optionIndex].hex);
-    return '<div class="color-contribution" style="--p:'+p.primary+';--d:'+p.dark+';--s:'+p.soft+';--a:'+p.accent+'">'+colorSignature(optionIndex)+'</div>';
-  }
+  if(fieldIndex===4)return vibeRenderers[optionIndex](labels,vars);
   if(fieldIndex===5)return convinceRenderers[optionIndex](labels,vars);
   if(fieldIndex===6)return heroRenderer(optionIndex,labels,vars);
   if(fieldIndex===7)return depthRenderers[optionIndex](labels,vars);
@@ -366,18 +376,18 @@ function renderPage(config,opts={}){
   config.forEach((v,i)=>{if(!Number.isInteger(v)||v<0||v>=OPTION_COUNT)throw new Error('Índice inválido no campo '+i)});
   const labels=labelsFor(config);
   const vars=Object.assign(createVariables(config),opts.variables||{});
-  const selectedColor=(opts.customColor||COLOR_OPTIONS[config[4]].hex).toUpperCase();
+  const selectedColor=(opts.customColor||'#2563EB').toUpperCase();
   const pal=palette(selectedColor);
-  const colorStyle='--lp-primary:'+pal.primary+';--lp-primary-dark:'+pal.dark+';--lp-on-primary:'+pal.onPrimary+';--lp-soft:'+pal.soft+';--lp-accent:'+pal.accent+';--lp-on-accent:'+pal.onAccent+';';
+  const colorStyle='--lp-primary:'+pal.primary+';--lp-primary-dark:'+pal.dark+';--lp-on-primary:'+pal.onPrimary+';--lp-soft:'+pal.soft+';--lp-accent:'+pal.accent+';--lp-on-accent:'+pal.onAccent+';--lp-bg:'+mix(pal.primary,'#FFFFFF',.965)+';--lp-surface:'+mix(pal.primary,'#FFFFFF',.99)+';--lp-line:'+mix(pal.primary,'#CBD5E1',.76)+';';
   const parts=[];
-  parts.push('<div class="lp-page" style="'+colorStyle+'">');
+  parts.push('<div class="lp-page vibe-root-'+(config[4]+1)+'" style="'+colorStyle+'">');
   parts.push(nav(labels,vars));
   parts.push(heroRenderer(config[6],labels,vars));
-  parts.push(colorSignature(config[4]));
   parts.push(nicheRenderers[config[0]](labels,vars));
   parts.push(goalRenderers[config[1]](labels,vars));
   parts.push(offerSlot(labels,config[2]));
   parts.push(audienceSlot(labels,config[3]));
+  parts.push(vibeRenderers[config[4]](labels,vars));
   parts.push(convinceRenderers[config[5]](labels,vars));
   parts.push(depthRenderers[config[7]](labels,vars));
   parts.push(proofRenderers[config[8]](labels,vars));
@@ -394,6 +404,7 @@ function stripEditorMetadata(html){
     .replace(/\sdata-var="[^"]*"/g,'')
     .replace(/\sdata-link-var="[^"]*"/g,'')
     .replace(/\sdata-image-var="[^"]*"/g,'')
+    .replace(/\sdata-free-text="[^"]*"/g,'')
     .replace(/\slp-editable/g,'')
     .replace(/\sselected/g,'')
     .replace(/>\s+</g,'><')
@@ -483,7 +494,6 @@ function runIntegrityTests(contextCount=120){
   check('Textos visíveis: 10 saídas textuais distintas em cada campo textual',()=>{
     const base=[0,0,0,0,0,0,0,0,0,0];
     for(let field=0;field<10;field++){
-      if(field===4)continue;
       const fps=Array.from({length:10},(_,option)=>visibleTextFingerprint(renderFieldContribution(field,option,base)));
       assertUnique(fps,'Texto visível duplicado no campo '+(field+1));
     }
@@ -524,7 +534,7 @@ if(!global.document||!document.getElementById('wizardView'))return;
 const state={
   step:0,
   config:Array(10).fill(null),
-  customColor:null,
+  customColor:'#2563EB',
   variables:Object.assign({},DEFAULTS)
 };
 
@@ -538,6 +548,8 @@ function pathLabels(){
 }
 function renderWizard(){
   const field=FIELDS[state.step],opts=currentOptions();
+  document.getElementById('questionCard').classList.remove('hidden');
+  document.getElementById('colorStage').classList.add('hidden');
   document.getElementById('questionKind').textContent=field.kind;
   document.getElementById('questionTitle').textContent=field.title;
   document.getElementById('questionHelp').textContent=field.help;
@@ -547,24 +559,14 @@ function renderWizard(){
   const box=document.getElementById('options');box.innerHTML='';
   opts.forEach((label,i)=>{
     const btn=document.createElement('button');
-    btn.className='option'+(state.config[state.step]===i?' active':'')+(field.id==='color'?' color-option':'');
-    const left=field.id==='color'?'<span class="swatch" style="background:'+COLOR_OPTIONS[i].hex+'"></span>':'<span class="option-index">'+(i+1)+'</span>';
-    const note=field.id==='color'?'<span class="option-note">'+COLOR_OPTIONS[i].hex+'</span>':'';
-    btn.innerHTML=left+'<span class="option-main"><span class="option-title">'+escapeHTML(label)+'</span>'+note+'</span>';
-    btn.onclick=()=>{
-      state.config[state.step]=i;
-      if(field.id==='color'){
-        state.customColor=COLOR_OPTIONS[i].hex;
-        syncColorControls();
-      }
-      renderWizard();
-    };
+    btn.className='option'+(state.config[state.step]===i?' active':'');
+    btn.innerHTML='<span class="option-index">'+(i+1)+'</span><span class="option-main"><span class="option-title">'+escapeHTML(label)+'</span></span>';
+    btn.onclick=()=>{state.config[state.step]=i;renderWizard()};
     box.appendChild(btn);
   });
-  document.getElementById('colorFineTune').classList.toggle('hidden',field.id!=='color'||state.config[4]==null);
   document.getElementById('prevBtn').disabled=state.step===0;
   document.getElementById('nextBtn').disabled=state.config[state.step]==null;
-  document.getElementById('nextBtn').textContent=state.step===9?'Gerar landing page':'Continuar';
+  document.getElementById('nextBtn').textContent=state.step===9?'Escolher cor':'Continuar';
   renderPathChips();
 }
 function renderPathChips(){
@@ -574,21 +576,70 @@ function renderPathChips(){
     const el=document.createElement('span');el.className='path-chip';el.innerHTML='<b>'+(i+1)+'</b> '+escapeHTML(label);wrap.appendChild(el);
   });
 }
-function syncColorControls(){
-  const chosen=state.customColor||COLOR_OPTIONS[state.config[4]||0].hex;
-  ['colorPicker','editorColorPicker'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=chosen});
-  ['hexInput','editorHexInput'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=chosen.toUpperCase()});
-  renderPalette('palettePreview',chosen);renderPalette('editorPalette',chosen);
-}
 function renderPalette(id,hex){
   const p=palette(hex),el=document.getElementById(id);if(!el)return;
-  el.innerHTML=[p.dark,p.primary,p.soft,p.accent,p.onPrimary].map(c=>'<span style="background:'+c+'" title="'+c+'"></span>').join('');
+  el.innerHTML=[p.primary,p.dark,p.soft,p.accent,p.onPrimary].map(c=>'<span style="background:'+c+'" title="'+c+'"></span>').join('');
+}
+function hsvToHex(h,s,v){
+  const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;
+  let r=0,g=0,b=0;
+  if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}
+  return rgbToHex((r+m)*255,(g+m)*255,(b+m)*255);
+}
+function rgbToHsv(hex){
+  const c=hexToRgb(hex)||{r:37,g:99,b:235},r=c.r/255,g=c.g/255,b=c.b/255,max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;
+  let h=0;if(d){if(max===r)h=60*(((g-b)/d)%6);else if(max===g)h=60*((b-r)/d+2);else h=60*((r-g)/d+4)}if(h<0)h+=360;
+  return {h,s:max===0?0:d/max,v:max};
+}
+function mountColorWheel(mountId){
+  const mount=document.getElementById(mountId);if(!mount)return;
+  mount.innerHTML='<div class="color-wheel-ui"><div class="color-wheel" role="slider" aria-label="Escolher cor"><div class="color-knob"></div></div><div class="color-wheel-fields"><label>HEX<input class="wheel-hex" maxlength="7" value="'+state.customColor+'"></label><label>Brilho<input class="wheel-value" type="range" min="35" max="100" value="92"></label></div></div>';
+  const wheel=mount.querySelector('.color-wheel'),knob=mount.querySelector('.color-knob'),hex=mount.querySelector('.wheel-hex'),val=mount.querySelector('.wheel-value');
+  let hsv=rgbToHsv(state.customColor);val.value=Math.round(hsv.v*100);
+  function positionKnob(){
+    const r=wheel.clientWidth/2,rad=hsv.h*Math.PI/180,dist=hsv.s*r*.88;
+    knob.style.left=(r+Math.cos(rad)*dist)+'px';knob.style.top=(r+Math.sin(rad)*dist)+'px';
+  }
+  function updateFromPointer(e){
+    const rect=wheel.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2,dx=e.clientX-cx,dy=e.clientY-cy,r=rect.width/2;
+    hsv.h=(Math.atan2(dy,dx)*180/Math.PI+360)%360;hsv.s=Math.min(1,Math.hypot(dx,dy)/(r*.88));hsv.v=Number(val.value)/100;
+    applyColor(hsvToHex(hsv.h,hsv.s,hsv.v));hex.value=state.customColor;positionKnob();
+  }
+  wheel.onpointerdown=e=>{wheel.setPointerCapture(e.pointerId);updateFromPointer(e)};
+  wheel.onpointermove=e=>{if(wheel.hasPointerCapture(e.pointerId))updateFromPointer(e)};
+  val.oninput=()=>{hsv.v=Number(val.value)/100;applyColor(hsvToHex(hsv.h,hsv.s,hsv.v));hex.value=state.customColor};
+  hex.oninput=()=>{let x=hex.value.trim().toUpperCase();if(x[0]!=='#')x='#'+x;if(/^#[0-9A-F]{6}$/.test(x)){hsv=rgbToHsv(x);val.value=Math.round(hsv.v*100);applyColor(x);requestAnimationFrame(positionKnob)}};
+  requestAnimationFrame(positionKnob);
+}
+function refreshColorUIs(){
+  renderPalette('wizardPalette',state.customColor);
+  renderPalette('editorPalette',state.customColor);
+  document.querySelectorAll('.wheel-hex').forEach(el=>{if(document.activeElement!==el)el.value=state.customColor});
 }
 function applyColor(hex){
   if(!/^#[0-9a-f]{6}$/i.test(hex))return false;
-  state.customColor=hex.toUpperCase();syncColorControls();
-  if(!document.getElementById('editorView').classList.contains('hidden'))renderPreview(false);
+  state.customColor=hex.toUpperCase();
+  refreshColorUIs();
+  const p=palette(state.customColor),page=document.querySelector('#lpCanvas .lp-page');
+  if(page){
+    page.style.setProperty('--lp-primary',p.primary);
+    page.style.setProperty('--lp-primary-dark',p.dark);
+    page.style.setProperty('--lp-on-primary',p.onPrimary);
+    page.style.setProperty('--lp-soft',p.soft);
+    page.style.setProperty('--lp-accent',p.accent);
+    page.style.setProperty('--lp-on-accent',p.onAccent);
+    page.style.setProperty('--lp-bg',mix(p.primary,'#FFFFFF',.965));
+    page.style.setProperty('--lp-surface',mix(p.primary,'#FFFFFF',.99));
+    page.style.setProperty('--lp-line',mix(p.primary,'#CBD5E1',.76));
+  }
   return true;
+}
+function showColorStage(){
+  document.getElementById('questionCard').classList.add('hidden');
+  document.getElementById('colorStage').classList.remove('hidden');
+  renderPalette('wizardPalette',state.customColor);
+  mountColorWheel('wizardColorWheel');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 function enterEditor(){
   const temp=state.config.map(v=>v==null?0:v);
@@ -597,20 +648,49 @@ function enterEditor(){
   document.getElementById('editorView').classList.remove('hidden');
   document.getElementById('backBtn').classList.remove('hidden');
   document.getElementById('downloadBtn').classList.remove('hidden');
-  syncColorControls();renderPreview(true);
+  renderPreview(true);
+  mountColorWheel('editorColorWheel');
+  renderPalette('editorPalette',state.customColor);
+  window.scrollTo(0,0);
 }
 function leaveEditor(){
   document.getElementById('wizardView').classList.remove('hidden');
   document.getElementById('editorView').classList.add('hidden');
   document.getElementById('backBtn').classList.add('hidden');
   document.getElementById('downloadBtn').classList.add('hidden');
+  showColorStage();
+}
+function makeAllTextEditable(root){
+  let id=0;
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{
+    acceptNode(node){
+      if(!node.nodeValue||!node.nodeValue.trim())return NodeFilter.FILTER_REJECT;
+      const p=node.parentElement;if(!p)return NodeFilter.FILTER_REJECT;
+      if(p.closest('[data-var]'))return NodeFilter.FILTER_REJECT;
+      if(p.closest('[data-free-text]'))return NodeFilter.FILTER_REJECT;
+      if(['SCRIPT','STYLE','NOSCRIPT'].includes(p.tagName))return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(node=>{
+    const span=document.createElement('span');
+    span.dataset.freeText='t'+(++id);
+    span.className='lp-editable lp-free-text';
+    span.contentEditable='true';
+    span.spellcheck=true;
+    span.textContent=node.nodeValue;
+    node.parentNode.replaceChild(span,node);
+  });
 }
 function renderPreview(reset){
   const cfg=state.config.map(v=>v==null?0:v);
   if(reset)state.variables=createVariables(cfg);
   const out=renderPage(cfg,{customColor:state.customColor,variables:state.variables});
   state.variables=out.vars;
-  document.getElementById('lpCanvas').innerHTML=out.html;
+  const canvas=document.getElementById('lpCanvas');
+  canvas.innerHTML=out.html;
+  makeAllTextEditable(canvas);
   bindEditable();
   syncGlobals();
   renderConfigSummary(out.labels);
@@ -630,12 +710,30 @@ function syncLink(name,value){
   state.variables[name]=value;
   document.querySelectorAll('#lpCanvas [data-link-var="'+name+'"]').forEach(el=>el.setAttribute('href',value));
 }
+function syncImage(name,value){
+  state.variables[name]=value;
+  document.querySelectorAll('#lpCanvas [data-image-var="'+name+'"]').forEach(el=>{
+    if(name==='heroImage'){
+      el.innerHTML='<img src="'+escapeHTML(value)+'" alt="Imagem principal">';
+    }else{
+      el.textContent='';
+      el.style.backgroundImage='url("'+String(value).replace(/"/g,'%22')+'")';
+      el.style.backgroundSize='cover';
+      el.style.backgroundPosition='center';
+    }
+  });
+}
 function bindEditable(){
   document.querySelectorAll('#lpCanvas [data-var]').forEach(el=>{
     el.classList.add('lp-editable');
+    el.setAttribute('contenteditable','true');
     el.onfocus=()=>selectElement(el);
     el.onclick=e=>{e.stopPropagation();if(el.hasAttribute('data-link-var'))e.preventDefault();selectElement(el)};
     el.oninput=()=>syncVar(el.dataset.var,el.textContent,el);
+  });
+  document.querySelectorAll('#lpCanvas [data-free-text]').forEach(el=>{
+    el.onfocus=()=>selectElement(el);
+    el.onclick=e=>{e.stopPropagation();selectElement(el)};
   });
   document.querySelectorAll('#lpCanvas [data-image-var]').forEach(el=>{
     el.onclick=e=>{e.preventDefault();e.stopPropagation();selectElement(el)};
@@ -645,40 +743,54 @@ function clearSelected(){document.querySelectorAll('#lpCanvas .selected').forEac
 function selectElement(el){
   clearSelected();el.classList.add('selected');
   const panel=document.getElementById('selectedPanel');
-  const varName=el.dataset.var,imageName=el.dataset.imageVar,linkName=el.dataset.linkVar;
+  const varName=el.dataset.var,imageName=el.dataset.imageVar,linkName=el.dataset.linkVar,freeName=el.dataset.freeText;
   let html='<h3>Elemento selecionado</h3>';
   if(imageName){
-    html+='<label>Imagem<label class="image-upload">Escolher arquivo<input id="imageFile" type="file" accept="image/*"></label></label><p class="muted tiny">A imagem fica incorporada no HTML exportado.</p>';
+    html+='<label>Imagem<input id="imageFile" type="file" accept="image/*"></label><p class="muted tiny">A imagem fica incorporada no HTML exportado.</p>';
     panel.innerHTML=html;
     const input=document.getElementById('imageFile');
-    input.style.display='block';
     input.onchange=()=>{
-      const f=input.files&&input.files[0];if(!f)return;
-      const reader=new FileReader();reader.onload=()=>{state.variables[imageName]=reader.result;renderPreview(false)};reader.readAsDataURL(f);
+      const file=input.files&&input.files[0];if(!file)return;
+      const reader=new FileReader();reader.onload=()=>syncImage(imageName,reader.result);reader.readAsDataURL(file);
     };
     return;
   }
-  if(varName){
-    const multi=['headline','subheadline','testimonial'].includes(varName);
+  if(varName||freeName){
+    const current=el.textContent||'';
+    const multi=current.length>70||['H1','H2','P','BLOCKQUOTE'].includes(el.tagName);
     html+='<label>Texto'+(multi?'<textarea id="selectedText"></textarea>':'<input id="selectedText" type="text">')+'</label>';
   }
-  if(linkName)html+='<label>Hyperlink<input id="selectedLink" type="text" placeholder="https://..."></label><p class="muted tiny">Todos os botões ligados a este link são atualizados juntos.</p>';
+  if(linkName)html+='<label>Hyperlink<input id="selectedLink" type="text" placeholder="https://..."></label><p class="muted tiny">O link pode ser URL, #seção, mailto: ou tel:.</p>';
   panel.innerHTML=html;
-  const txt=document.getElementById('selectedText');if(txt){txt.value=state.variables[varName]||'';txt.oninput=()=>syncVar(varName,txt.value)}
-  const lnk=document.getElementById('selectedLink');if(lnk){lnk.value=state.variables[linkName]||'';lnk.oninput=()=>syncLink(linkName,lnk.value)}
+  const txt=document.getElementById('selectedText');
+  if(txt){
+    txt.value=el.textContent||'';
+    txt.oninput=()=>{if(varName)syncVar(varName,txt.value,el);else el.textContent=txt.value};
+  }
+  const lnk=document.getElementById('selectedLink');
+  if(lnk){lnk.value=state.variables[linkName]||el.getAttribute('href')||'';lnk.oninput=()=>syncLink(linkName,lnk.value)}
 }
 function renderConfigSummary(labels){
   document.getElementById('configSummary').innerHTML=labels.map((x,i)=>'<div class="config-row"><b>'+(i+1)+'</b><span>'+escapeHTML(FIELDS[i].kind)+': '+escapeHTML(x)+'</span></div>').join('');
 }
+function cleanExportClone(){
+  const clone=document.getElementById('lpCanvas').cloneNode(true);
+  clone.removeAttribute('id');
+  clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('[spellcheck]').forEach(el=>el.removeAttribute('spellcheck'));
+  clone.querySelectorAll('[data-var],[data-link-var],[data-image-var],[data-free-text]').forEach(el=>{
+    el.removeAttribute('data-var');el.removeAttribute('data-link-var');el.removeAttribute('data-image-var');el.removeAttribute('data-free-text');
+  });
+  clone.querySelectorAll('.selected,.lp-editable').forEach(el=>{el.classList.remove('selected','lp-editable')});
+  return clone;
+}
 function exportHTML(){
-  const cfg=state.config.map(v=>v==null?0:v);
-  const raw=renderPage(cfg,{customColor:state.customColor,variables:state.variables}).html;
-  const clean=stripEditorMetadata(raw);
-  const cssPromise=fetch('./styles.css').then(r=>r.text());
-  cssPromise.then(css=>{
-    const lpCss=css.slice(css.indexOf('.lp-page'));
+  const clone=cleanExportClone();
+  fetch('./styles.css').then(r=>r.text()).then(css=>{
+    const start=css.indexOf('.lp-host');
+    const lpCss=start>=0?css.slice(start):css.slice(css.indexOf('.lp-page'));
     const title=state.variables.companyName==='NOMEDAEMPRESA'?'Landing Page':state.variables.companyName;
-    const file='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+escapeHTML(title)+'</title><style>'+lpCss+'</style></head><body style="margin:0">'+clean+'</body></html>';
+    const file='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+escapeHTML(title)+'</title><style>'+lpCss+'</style></head><body style="margin:0">'+clone.outerHTML+'</body></html>';
     const blob=new Blob([file],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     a.href=url;a.download='landing-page.html';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);
   });
@@ -687,21 +799,18 @@ function exportHTML(){
 document.getElementById('prevBtn').onclick=()=>{if(state.step>0){state.step--;renderWizard()}};
 document.getElementById('nextBtn').onclick=()=>{
   if(state.config[state.step]==null)return;
-  if(state.step<9){state.step++;renderWizard()}else enterEditor();
+  if(state.step<9){state.step++;renderWizard()}else showColorStage();
 };
+document.getElementById('colorBackBtn').onclick=()=>{document.getElementById('colorStage').classList.add('hidden');document.getElementById('questionCard').classList.remove('hidden');state.step=9;renderWizard()};
+document.getElementById('generateBtn').onclick=enterEditor;
 document.getElementById('backBtn').onclick=leaveEditor;
 document.getElementById('downloadBtn').onclick=exportHTML;
 document.querySelectorAll('[data-device]').forEach(btn=>btn.onclick=()=>{
   document.querySelectorAll('[data-device]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
   const shell=document.getElementById('previewShell');shell.className='preview-shell '+btn.dataset.device;
 });
-[['colorPicker','input'],['editorColorPicker','input']].forEach(([id])=>{
-  const el=document.getElementById(id);el.addEventListener('input',()=>applyColor(el.value));
-});
-[['hexInput'],['editorHexInput']].forEach(([id])=>{
-  const el=document.getElementById(id);el.addEventListener('input',()=>{let v=el.value.trim();if(v[0]!=='#')v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v))applyColor(v)});
-});
 document.getElementById('lpCanvas').addEventListener('click',e=>{if(e.target===e.currentTarget)clearSelected()});
 
 renderWizard();
+
 })(window);
