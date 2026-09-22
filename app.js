@@ -348,14 +348,14 @@ function renderFieldContribution(fieldIndex,optionIndex,baseConfig){
 }
 function visibleTextFingerprint(html){
   const text=String(html)
-    .replace(/<script[\\s\\S]*?<\\/script>/gi,' ')
-    .replace(/<style[\\s\\S]*?<\\/style>/gi,' ')
+    .replace(/<script[\s\S]*?<\/script>/gi,' ')
+    .replace(/<style[\s\S]*?<\/style>/gi,' ')
     .replace(/<[^>]+>/g,' ')
     .replace(/&nbsp;/g,' ')
     .replace(/&amp;/g,'&')
     .replace(/&#039;/g,"'")
     .replace(/&quot;/g,'"')
-    .replace(/\\s+/g,' ')
+    .replace(/\s+/g,' ')
     .trim()
     .toLowerCase();
   return hashString(text).toString(16).padStart(8,'0');
