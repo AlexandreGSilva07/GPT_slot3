@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LP10B — Testes de integridade</title>
+<style>
+:root{--bg:#09111f;--panel:#111b2e;--line:#293a57;--text:#f8fafc;--muted:#9fb0c7;--ok:#22c55e;--bad:#ef4444;--warn:#f59e0b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+main{width:min(1100px,100%);margin:auto;padding:20px 12px 60px}
+a{color:#c4b5fd}.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:clamp(30px,7vw,54px);letter-spacing:-.055em;line-height:.98;margin:8px 0 10px}.lead{color:var(--muted);line-height:1.55;max-width:800px;margin:0}
+.badge{display:inline-block;border:1px solid var(--line);background:#162137;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:900;letter-spacing:.08em}
+.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:18px 0}
+.kpi{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:14px}.kpi strong{display:block;font-size:28px}.kpi span{font-size:11px;color:var(--muted)}
+.card{border:1px solid var(--line);background:var(--panel);border-radius:16px;overflow:hidden;margin:10px 0}
+.row{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:14px;border-bottom:1px solid rgba(255,255,255,.06)}.row:last-child{border-bottom:0}
+.icon{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:950}.pass .icon{background:rgba(34,197,94,.15);color:var(--ok)}.fail .icon{background:rgba(239,68,68,.15);color:var(--bad)}
+.row strong{font-size:13px}.detail{display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:4px}.time{color:#7f92ad;font-size:10px;white-space:nowrap}
+.matrix{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:12px}.cell{border:1px solid var(--line);border-radius:9px;padding:9px;background:#0c1527;font-size:10px}.cell b{display:block;color:#c4b5fd;margin-bottom:3px}.cell span{color:var(--muted)}
+.note{border-left:3px solid var(--warn);padding:12px 14px;background:#161b29;color:#cbd5e1;font-size:12px;line-height:1.5;margin:16px 0}
+button{border:1px solid #6d55a8;background:#5b21b6;color:#fff;border-radius:10px;padding:10px 13px;font-weight:850;cursor:pointer}
+@media(min-width:700px){main{padding:32px 20px 70px}.summary{grid-template-columns:repeat(4,1fr)}.matrix{grid-template-columns:repeat(10,1fr)}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div>
+      <span class="badge">AUDITORIA DO GERADOR</span>
+      <h1>Testes determinísticos de integridade</h1>
+      <p class="lead">Esta página testa o motor real do LP10B. Ela compara HTML normalizado, ignora atributos do editor e exige que as opções de cada campo permaneçam distinguíveis em vários contextos do DAG.</p>
+    </div>
+    <div>
+      <a href="./">← voltar ao gerador</a>
+      <button id="rerun">Rodar novamente</button>
+    </div>
+  </div>
+
+  <div class="note"><b>Importante:</b> não é necessário enumerar 10 bilhões de páginas para provar o produto cartesiano. O gerador sempre mantém um efeito próprio de cada um dos 10 campos na saída. Os testes verificam essa injetividade por dimensão e depois fazem mutações em contextos determinísticos do DAG para procurar colisões.</div>
+
+  <section id="summary" class="summary"></section>
+  <section id="results" class="card"></section>
+
+  <section class="card">
+    <div class="row"><div class="icon">#</div><div><strong>Fingerprints da configuração base e das 90 mutações unitárias</strong><span class="detail">A configuração 0000000000 aparece uma vez; depois cada um dos 10 campos é alterado para as outras 9 opções. O esperado é 91 fingerprints únicas.</span></div><span></span></div>
+    <div id="matrix" class="matrix"></div>
+  </section>
+</main>
+<script src="./app.js"></script>
+<script>
+(function(){
+  function run(){
+    var core=window.LP10B_CORE;
+    var started=performance.now();
+    var report=core.runIntegrityTests(200);
+    var elapsed=Math.round(performance.now()-started);
+    var failed=report.results.filter(function(r){return !r.ok}).length;
+    var compared=200*100 + 80*2 + 900 + 100;
+
+    document.getElementById('summary').innerHTML=
+      '<div class="kpi"><strong style="color:'+(report.ok?'#22c55e':'#ef4444')+'">'+(report.ok?'PASS':'FAIL')+'</strong><span>status geral</span></div>'+
+      '<div class="kpi"><strong>'+report.results.length+'</strong><span>grupos de testes</span></div>'+
+      '<div class="kpi"><strong>'+compared.toLocaleString('pt-BR')+'+</strong><span>renderizações/comparações</span></div>'+
+      '<div class="kpi"><strong>'+elapsed+' ms</strong><span>tempo desta execução</span></div>';
+
+    document.getElementById('results').innerHTML=report.results.map(function(r){
+      return '<div class="row '+(r.ok?'pass':'fail')+'"><div class="icon">'+(r.ok?'✓':'×')+'</div><div><strong>'+r.name+'</strong><span class="detail">'+r.detail+'</span></div><span class="time">'+r.time+' ms</span></div>';
+    }).join('');
+
+    var base=[0,0,0,0,0,0,0,0,0,0], entries=[{name:'BASE',cfg:base.slice()}];
+    for(var f=0;f<10;f++)for(var o=1;o<10;o++){var c=base.slice();c[f]=o;entries.push({name:'C'+(f+1)+'·O'+(o+1),cfg:c})}
+    var seen=new Set(), collision=false;
+    document.getElementById('matrix').innerHTML=entries.map(function(e){
+      var fp=core.visibleFingerprint(e.cfg);if(seen.has(fp))collision=true;seen.add(fp);
+      return '<div class="cell"><b>'+e.name+'</b><span>'+fp+'</span></div>';
+    }).join('');
+    if(seen.size!==91||collision){
+      var fail=document.createElement('div');fail.className='note';fail.style.borderColor='#ef4444';fail.textContent='Falha: as 91 mutações unitárias não produziram 91 fingerprints únicas.';
+      document.getElementById('matrix').parentNode.appendChild(fail);
+    }
+  }
+  document.getElementById('rerun').onclick=run;
+  run();
+})();
+</script>
+</body>
+</html>
