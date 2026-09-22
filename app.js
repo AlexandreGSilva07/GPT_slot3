@@ -380,7 +380,8 @@ function deterministicContexts(count){
 }
 function runIntegrityTests(contextCount=120){
   const results=[];
-  const check=(name,fn)=>{const start=performance.now?performance.now():Date.now();try{const detail=fn();results.push({name,ok:true,detail,time:Math.round(((performance.now?performance.now():Date.now())-start)*100)/100})}catch(e){results.push({name,ok:false,detail:e.message,time:0})}};
+  const now=()=>typeof performance!=='undefined'&&performance.now?performance.now():Date.now();
+  const check=(name,fn)=>{const start=now();try{const detail=fn();results.push({name,ok:true,detail,time:Math.round((now()-start)*100)/100})}catch(e){results.push({name,ok:false,detail:e.message,time:0})}};
 
   check('Schema: 10 campos × 10 opções',()=>{
     if(FIELDS.length!==10)throw new Error('Há '+FIELDS.length+' campos');
