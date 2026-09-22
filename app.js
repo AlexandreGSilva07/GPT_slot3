@@ -327,6 +327,40 @@ function colorSignature(index){
   return '<div class="lp-wrap"><div class="color-signature color-signature-'+(index+1)+'" aria-label="'+labels[index]+'"></div></div>';
 }
 
+function renderFieldContribution(fieldIndex,optionIndex,baseConfig){
+  const config=(baseConfig||Array(10).fill(0)).slice();
+  config[fieldIndex]=optionIndex;
+  const labels=labelsFor(config),vars=createVariables(config);
+  if(fieldIndex===0)return nicheRenderers[optionIndex](labels,vars);
+  if(fieldIndex===1)return goalRenderers[optionIndex](labels,vars);
+  if(fieldIndex===2)return offerRenderers[optionIndex](labels,vars);
+  if(fieldIndex===3)return audienceRenderers[optionIndex](labels,vars);
+  if(fieldIndex===4){
+    const p=palette(COLOR_OPTIONS[optionIndex].hex);
+    return '<div class="color-contribution" style="--p:'+p.primary+';--d:'+p.dark+';--s:'+p.soft+';--a:'+p.accent+'">'+colorSignature(optionIndex)+'</div>';
+  }
+  if(fieldIndex===5)return convinceRenderers[optionIndex](labels,vars);
+  if(fieldIndex===6)return heroRenderer(optionIndex,labels,vars);
+  if(fieldIndex===7)return depthRenderers[optionIndex](labels,vars);
+  if(fieldIndex===8)return proofRenderers[optionIndex](labels,vars);
+  if(fieldIndex===9)return contactRenderers[optionIndex](labels,vars);
+  throw new Error('Campo inexistente: '+fieldIndex);
+}
+function visibleTextFingerprint(html){
+  const text=String(html)
+    .replace(/<script[\\s\\S]*?<\\/script>/gi,' ')
+    .replace(/<style[\\s\\S]*?<\\/style>/gi,' ')
+    .replace(/<[^>]+>/g,' ')
+    .replace(/&nbsp;/g,' ')
+    .replace(/&amp;/g,'&')
+    .replace(/&#039;/g,"'")
+    .replace(/&quot;/g,'"')
+    .replace(/\\s+/g,' ')
+    .trim()
+    .toLowerCase();
+  return hashString(text).toString(16).padStart(8,'0');
+}
+
 function renderPage(config,opts={}){
   if(!Array.isArray(config)||config.length!==FIELD_COUNT)throw new Error('Config precisa ter 10 índices');
   config.forEach((v,i)=>{if(!Number.isInteger(v)||v<0||v>=OPTION_COUNT)throw new Error('Índice inválido no campo '+i)});
@@ -437,22 +471,29 @@ function runIntegrityTests(contextCount=120){
     return (contextCount*10)+' conjuntos de mutação; '+(contextCount*100)+' páginas comparadas';
   });
 
-  check('Componentes de variante: 10 templates distintos por família',()=>{
-    const L=labelsFor([0,0,0,0,0,0,0,0,0,0]),V=createVariables([0,0,0,0,0,0,0,0,0,0]);
-    const families=[
-      nicheRenderers.map(fn=>stripEditorMetadata(fn(L,V))),
-      goalRenderers.map(fn=>stripEditorMetadata(fn(L,V))),
-      offerRenderers.map(fn=>stripEditorMetadata(fn(L,V))),
-      audienceRenderers.map(fn=>stripEditorMetadata(fn(L,V))),
-      convinceRenderers.map(fn=>stripEditorMetadata(fn(L,V))),
-      Array.from({length:10},(_,i)=>stripEditorMetadata(heroRenderer(i,L,V))),
-      depthRenderers.map(fn=>stripEditorMetadata(fn(L,V))),
-      proofRenderers.map(fn=>stripEditorMetadata(fn(L,V))),
-      contactRenderers.map(fn=>stripEditorMetadata(fn(L,V)))
-    ];
-    families.forEach((arr,i)=>assertUnique(arr,'Família visual '+(i+1)));
-    assertUnique(COLOR_OPTIONS.map(x=>palette(x.hex).primary),'Família de cor');
-    return '9 famílias de componentes + 10 paletas sem templates duplicados';
+  check('100 contribuições: nenhuma opção repete exatamente o componente de outra',()=>{
+    const base=[0,0,0,0,0,0,0,0,0,0];
+    for(let field=0;field<10;field++){
+      const outputs=Array.from({length:10},(_,option)=>stripEditorMetadata(renderFieldContribution(field,option,base)));
+      assertUnique(outputs,'Contribuição duplicada no campo '+(field+1));
+    }
+    return '10 campos × 10 contribuições isoladas; zero HTMLs de opção duplicados';
+  });
+
+  check('Textos visíveis: 10 saídas textuais distintas em cada campo textual',()=>{
+    const base=[0,0,0,0,0,0,0,0,0,0];
+    for(let field=0;field<10;field++){
+      if(field===4)continue;
+      const fps=Array.from({length:10},(_,option)=>visibleTextFingerprint(renderFieldContribution(field,option,base)));
+      assertUnique(fps,'Texto visível duplicado no campo '+(field+1));
+    }
+    return '9 campos textuais × 10 opções; zero corpo textual idêntico';
+  });
+
+  check('Rótulos-base: 100 escolhas sem rótulo exatamente repetido',()=>{
+    const all=FIELDS.flatMap(f=>f.options.map(x=>String(x).trim().toLowerCase()));
+    assertUnique(all,'Rótulo-base repetido entre campos');
+    return '100 rótulos-base distintos';
   });
 
   check('Campos anteriores não perdem efeito após overrides',()=>{
@@ -476,7 +517,7 @@ function runIntegrityTests(contextCount=120){
   return {ok:results.every(r=>r.ok),results,contexts:contextCount};
 }
 
-global.LP10B_CORE={FIELDS,COLOR_OPTIONS,OVERRIDES,DEFAULTS,optionsFor,labelFor,labelsFor,palette,renderPage,stripEditorMetadata,visibleFingerprint,runIntegrityTests,deterministicContexts};
+global.LP10B_CORE={FIELDS,COLOR_OPTIONS,OVERRIDES,DEFAULTS,optionsFor,labelFor,labelsFor,palette,renderPage,renderFieldContribution,stripEditorMetadata,visibleFingerprint,visibleTextFingerprint,runIntegrityTests,deterministicContexts};
 
 if(!global.document||!document.getElementById('wizardView'))return;
 
