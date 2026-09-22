@@ -46,6 +46,11 @@ button{border:1px solid #6d55a8;background:#5b21b6;color:#fff;border-radius:10px
     <div class="row"><div class="icon">#</div><div><strong>Fingerprints da configuração base e das 90 mutações unitárias</strong><span class="detail">A configuração 0000000000 aparece uma vez; depois cada um dos 10 campos é alterado para as outras 9 opções. O esperado é 91 fingerprints únicas.</span></div><span></span></div>
     <div id="matrix" class="matrix"></div>
   </section>
+
+  <section class="card">
+    <div class="row"><div class="icon">100</div><div><strong>As 100 contribuições isoladas dos campos</strong><span class="detail">Cada célula mostra o hash do componente normalizado e, nos campos textuais, o hash do texto visível. Nenhuma das 10 opções de um mesmo campo pode repetir ambos.</span></div><span></span></div>
+    <div id="componentMatrix" class="matrix"></div>
+  </section>
 </main>
 <script src="./app.js"></script>
 <script>
@@ -79,6 +84,23 @@ button{border:1px solid #6d55a8;background:#5b21b6;color:#fff;border-radius:10px
       var fail=document.createElement('div');fail.className='note';fail.style.borderColor='#ef4444';fail.textContent='Falha: as 91 mutações unitárias não produziram 91 fingerprints únicas.';
       document.getElementById('matrix').parentNode.appendChild(fail);
     }
+
+    function tinyHash(str){
+      var h=2166136261;
+      for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}
+      return (h>>>0).toString(16).padStart(8,'0');
+    }
+    var contributionCells=[];
+    var baseContext=[0,0,0,0,0,0,0,0,0,0];
+    for(var field=0;field<10;field++){
+      for(var option=0;option<10;option++){
+        var fragment=core.stripEditorMetadata(core.renderFieldContribution(field,option,baseContext));
+        var htmlHash=tinyHash(fragment);
+        var textHash=field===4?'cor':core.visibleTextFingerprint(fragment);
+        contributionCells.push('<div class="cell"><b>C'+(field+1)+'·O'+(option+1)+'</b><span>HTML '+htmlHash+'<br>TEXTO '+textHash+'</span></div>');
+      }
+    }
+    document.getElementById('componentMatrix').innerHTML=contributionCells.join('');
   }
   document.getElementById('rerun').onclick=run;
   run();
