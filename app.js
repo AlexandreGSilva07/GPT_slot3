@@ -497,7 +497,7 @@ function runIntegrityTests(contextCount=120){
       const fps=Array.from({length:10},(_,option)=>visibleTextFingerprint(renderFieldContribution(field,option,base)));
       assertUnique(fps,'Texto visível duplicado no campo '+(field+1));
     }
-    return '9 campos textuais × 10 opções; zero corpo textual idêntico';
+    return '10 campos × 10 opções; zero corpo textual idêntico';
   });
 
   check('Rótulos-base: 100 escolhas sem rótulo exatamente repetido',()=>{
@@ -662,6 +662,7 @@ function leaveEditor(){
 }
 function makeAllTextEditable(root){
   let id=0;
+  root.querySelectorAll('a[href]').forEach((a,i)=>{if(!a.hasAttribute('data-link-var'))a.dataset.freeLink='l'+(i+1)});
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{
     acceptNode(node){
       if(!node.nodeValue||!node.nodeValue.trim())return NodeFilter.FILTER_REJECT;
@@ -743,7 +744,8 @@ function clearSelected(){document.querySelectorAll('#lpCanvas .selected').forEac
 function selectElement(el){
   clearSelected();el.classList.add('selected');
   const panel=document.getElementById('selectedPanel');
-  const varName=el.dataset.var,imageName=el.dataset.imageVar,linkName=el.dataset.linkVar,freeName=el.dataset.freeText;
+  const anchor=el.closest&&el.closest('a[href]');
+  const varName=el.dataset.var,imageName=el.dataset.imageVar,linkName=el.dataset.linkVar,freeName=el.dataset.freeText,freeLink=anchor&&anchor.dataset.freeLink;
   let html='<h3>Elemento selecionado</h3>';
   if(imageName){
     html+='<label>Imagem<input id="imageFile" type="file" accept="image/*"></label><p class="muted tiny">A imagem fica incorporada no HTML exportado.</p>';
@@ -760,7 +762,7 @@ function selectElement(el){
     const multi=current.length>70||['H1','H2','P','BLOCKQUOTE'].includes(el.tagName);
     html+='<label>Texto'+(multi?'<textarea id="selectedText"></textarea>':'<input id="selectedText" type="text">')+'</label>';
   }
-  if(linkName)html+='<label>Hyperlink<input id="selectedLink" type="text" placeholder="https://..."></label><p class="muted tiny">O link pode ser URL, #seção, mailto: ou tel:.</p>';
+  if(linkName||freeLink)html+='<label>Hyperlink<input id="selectedLink" type="text" placeholder="https://..."></label><p class="muted tiny">O link pode ser URL, #seção, mailto: ou tel:.</p>';
   panel.innerHTML=html;
   const txt=document.getElementById('selectedText');
   if(txt){
@@ -768,7 +770,7 @@ function selectElement(el){
     txt.oninput=()=>{if(varName)syncVar(varName,txt.value,el);else el.textContent=txt.value};
   }
   const lnk=document.getElementById('selectedLink');
-  if(lnk){lnk.value=state.variables[linkName]||el.getAttribute('href')||'';lnk.oninput=()=>syncLink(linkName,lnk.value)}
+  if(lnk){lnk.value=linkName?(state.variables[linkName]||''):(anchor?anchor.getAttribute('href')||'':'');lnk.oninput=()=>{if(linkName)syncLink(linkName,lnk.value);else if(anchor)anchor.setAttribute('href',lnk.value)}}
 }
 function renderConfigSummary(labels){
   document.getElementById('configSummary').innerHTML=labels.map((x,i)=>'<div class="config-row"><b>'+(i+1)+'</b><span>'+escapeHTML(FIELDS[i].kind)+': '+escapeHTML(x)+'</span></div>').join('');
@@ -778,8 +780,8 @@ function cleanExportClone(){
   clone.removeAttribute('id');
   clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
   clone.querySelectorAll('[spellcheck]').forEach(el=>el.removeAttribute('spellcheck'));
-  clone.querySelectorAll('[data-var],[data-link-var],[data-image-var],[data-free-text]').forEach(el=>{
-    el.removeAttribute('data-var');el.removeAttribute('data-link-var');el.removeAttribute('data-image-var');el.removeAttribute('data-free-text');
+  clone.querySelectorAll('[data-var],[data-link-var],[data-image-var],[data-free-text],[data-free-link]').forEach(el=>{
+    el.removeAttribute('data-var');el.removeAttribute('data-link-var');el.removeAttribute('data-image-var');el.removeAttribute('data-free-text');el.removeAttribute('data-free-link');
   });
   clone.querySelectorAll('.selected,.lp-editable').forEach(el=>{el.classList.remove('selected','lp-editable')});
   return clone;
