@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>LP10B — Testes de integridade</title>
+<link rel="stylesheet" href="./styles.css">
 <style>
 :root{--bg:#09111f;--panel:#111b2e;--line:#293a57;--text:#f8fafc;--muted:#9fb0c7;--ok:#22c55e;--bad:#ef4444;--warn:#f59e0b}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
@@ -41,6 +42,7 @@ button{border:1px solid #6d55a8;background:#5b21b6;color:#fff;border-radius:10px
 
   <section id="summary" class="summary"></section>
   <section id="results" class="card"></section>
+  <section id="browserResults" class="card"></section>
 
   <section class="card">
     <div class="row"><div class="icon">#</div><div><strong>Fingerprints da configuração base e das 90 mutações unitárias</strong><span class="detail">A configuração 0000000000 aparece uma vez; depois cada um dos 10 campos é alterado para as outras 9 opções. O esperado é 91 fingerprints únicas.</span></div><span></span></div>
@@ -96,11 +98,52 @@ button{border:1px solid #6d55a8;background:#5b21b6;color:#fff;border-radius:10px
       for(var option=0;option<10;option++){
         var fragment=core.stripEditorMetadata(core.renderFieldContribution(field,option,baseContext));
         var htmlHash=tinyHash(fragment);
-        var textHash=field===4?'cor':core.visibleTextFingerprint(fragment);
+        var textHash=core.visibleTextFingerprint(fragment);
         contributionCells.push('<div class="cell"><b>C'+(field+1)+'·O'+(option+1)+'</b><span>HTML '+htmlHash+'<br>TEXTO '+textHash+'</span></div>');
       }
     }
     document.getElementById('componentMatrix').innerHTML=contributionCells.join('');
+
+    var browserChecks=[];
+    function addCheck(name,ok,detail){browserChecks.push({name:name,ok:ok,detail:detail})}
+
+    var widths=[320,360,390,600,768,1024];
+    widths.forEach(function(width){
+      var probe=document.createElement('div');
+      probe.className='lp-host';
+      probe.style.cssText='position:fixed;left:-20000px;top:0;width:'+width+'px;visibility:hidden;background:#fff;';
+      probe.innerHTML=core.renderPage([0,0,0,0,0,0,0,0,0,0],{customColor:'#2563EB'}).html;
+      document.body.appendChild(probe);
+      core.decorateAllTextEditable(probe);
+      var overflow=probe.scrollWidth>probe.clientWidth+1;
+      addCheck('Responsividade '+width+'px',!overflow,'clientWidth '+probe.clientWidth+' / scrollWidth '+probe.scrollWidth);
+
+      var walker=document.createTreeWalker(probe,NodeFilter.SHOW_TEXT);
+      var uncovered=0,totalText=0,node;
+      while(node=walker.nextNode()){
+        if(!node.nodeValue||!node.nodeValue.trim())continue;
+        totalText++;
+        var parent=node.parentElement;
+        if(!parent.closest('[contenteditable="true"]'))uncovered++;
+      }
+      if(width===360)addCheck('Todo texto do HTML editável',uncovered===0,totalText+' blocos de texto verificados; '+uncovered+' sem contenteditable');
+
+      if(width===390){
+        var links=Array.from(probe.querySelectorAll('a[href]'));
+        var uneditableLinks=links.filter(function(a){return !a.hasAttribute('data-link-var')&&!a.hasAttribute('data-free-link')});
+        addCheck('Todos os hyperlinks editáveis',uneditableLinks.length===0,links.length+' links verificados; '+uneditableLinks.length+' sem binding de link');
+      }
+      probe.remove();
+    });
+
+    document.getElementById('browserResults').innerHTML=
+      '<div class="row"><div class="icon">UI</div><div><strong>Testes reais do editor e do mobile</strong><span class="detail">Renderizados no navegador usando o mesmo CSS e o mesmo motor da LP.</span></div><span></span></div>'+
+      browserChecks.map(function(r){return '<div class="row '+(r.ok?'pass':'fail')+'"><div class="icon">'+(r.ok?'✓':'×')+'</div><div><strong>'+r.name+'</strong><span class="detail">'+r.detail+'</span></div><span></span></div>'}).join('');
+
+    if(browserChecks.some(function(r){return !r.ok})){
+      document.querySelector('#summary .kpi strong').textContent='FAIL';
+      document.querySelector('#summary .kpi strong').style.color='#ef4444';
+    }
   }
   document.getElementById('rerun').onclick=run;
   run();
