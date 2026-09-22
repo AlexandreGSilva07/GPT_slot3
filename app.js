@@ -787,8 +787,7 @@ function cleanExportClone(){
 function exportHTML(){
   const clone=cleanExportClone();
   fetch('./styles.css').then(r=>r.text()).then(css=>{
-    const start=css.indexOf('.lp-host');
-    const lpCss=start>=0?css.slice(start):css.slice(css.indexOf('.lp-page'));
+    const lpCss=css;
     const title=state.variables.companyName==='NOMEDAEMPRESA'?'Landing Page':state.variables.companyName;
     const file='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+escapeHTML(title)+'</title><style>'+lpCss+'</style></head><body style="margin:0">'+clone.outerHTML+'</body></html>';
     const blob=new Blob([file],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
