@@ -8,130 +8,132 @@
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <div id="app">
-    <header class="appbar">
-      <div class="brand">
-        <div class="brand-badge">10B</div>
-        <div>
-          <strong>LP10B</strong>
-          <small>gerador determinístico</small>
+<div id="app">
+  <header class="appbar">
+    <div class="brand">
+      <div class="brand-badge">10B</div>
+      <div><strong>LP10B</strong><small>gerador determinístico</small></div>
+    </div>
+    <div class="app-actions">
+      <button id="backBtn" class="ui-btn ghost hidden">Perguntas</button>
+      <a class="ui-btn" href="./tests.html">Testes</a>
+      <button id="downloadBtn" class="ui-btn success hidden">Baixar HTML</button>
+    </div>
+  </header>
+
+  <main id="wizardView" class="wizard">
+    <section class="intro">
+      <div>
+        <span class="overline">SEM IA • SEM BACKEND • DETERMINÍSTICO</span>
+        <h1>10 campos.<br>10 opções cada.<br><em>10 bilhões</em> de LPs-base.</h1>
+        <p>As 10 decisões combinatórias são separadas da personalização livre. A cor é escolhida depois num seletor contínuo e não altera a contagem de 10 bilhões.</p>
+      </div>
+      <div class="math-card">
+        <span>Espaço-base</span>
+        <strong>10<sup>10</sup></strong>
+        <b>10.000.000.000</b>
+        <small>Textos, imagens, hyperlinks e qualquer HEX escolhido no editor são personalizações posteriores.</small>
+      </div>
+    </section>
+
+    <section id="questionCard" class="wizard-card">
+      <div class="progress-head">
+        <span id="stepLabel">Campo 1 de 10</span>
+        <span id="pathLabel">0/10 definidos</span>
+      </div>
+      <div class="progress-track"><div id="progressBar"></div></div>
+
+      <div class="question-head">
+        <span id="questionKind" class="overline"></span>
+        <h2 id="questionTitle"></h2>
+        <p id="questionHelp"></p>
+      </div>
+
+      <div id="options" class="option-grid"></div>
+
+      <div class="wizard-foot">
+        <button id="prevBtn" class="ui-btn">Voltar</button>
+        <button id="nextBtn" class="ui-btn primary">Continuar</button>
+      </div>
+    </section>
+
+    <section id="colorStage" class="wizard-card color-stage hidden">
+      <div class="progress-head">
+        <span>Cor da marca</span>
+        <span>personalização livre</span>
+      </div>
+      <div class="question-head">
+        <span class="overline">FORA DA CONTAGEM DOS 10B</span>
+        <h2>Escolha sua cor</h2>
+        <p>Arraste dentro do círculo. Se preferir, digite o HEX. O sistema calcula automaticamente os contrapontos e contrastes da página.</p>
+      </div>
+      <div class="color-stage-body">
+        <div id="wizardColorWheel" class="color-wheel-mount"></div>
+        <div class="color-stage-info">
+          <div class="palette-copy">
+            <strong>Paleta automática</strong>
+            <span>principal • escura • suave • complementar • contraste</span>
+          </div>
+          <div id="wizardPalette" class="palette-preview"></div>
         </div>
       </div>
-      <div class="app-actions">
-        <button id="backBtn" class="ui-btn ghost hidden">Perguntas</button>
-        <a class="ui-btn" href="./tests.html">Testes</a>
-        <button id="downloadBtn" class="ui-btn success hidden">Baixar HTML</button>
+      <div class="wizard-foot">
+        <button id="colorBackBtn" class="ui-btn">Voltar</button>
+        <button id="generateBtn" class="ui-btn primary">Gerar landing page</button>
       </div>
-    </header>
+    </section>
 
-    <main id="wizardView" class="wizard">
-      <section class="intro">
-        <div>
-          <span class="overline">SEM IA • SEM BACKEND • DETERMINÍSTICO</span>
-          <h1>10 campos.<br>10 opções cada.<br><em>10 bilhões</em> de LPs-base.</h1>
-          <p>Cada escolha deixa uma diferença real e preservada na página gerada. Dependências só trocam opções de casos específicos; não apagam escolhas anteriores.</p>
+    <div id="pathChips" class="path-chips"></div>
+  </main>
+
+  <main id="editorView" class="editor hidden">
+    <section class="preview-zone">
+      <div class="preview-toolbar">
+        <div><strong>Preview ao vivo</strong><span>clique em qualquer texto para editar</span></div>
+        <div class="device-switch">
+          <button data-device="mobile" class="active">Celular</button>
+          <button data-device="tablet">Tablet</button>
+          <button data-device="desktop">Desktop</button>
         </div>
-        <div class="math-card">
-          <span>Espaço-base</span>
-          <strong>10<sup>10</sup></strong>
-          <b>10.000.000.000</b>
-          <small>A edição livre de textos, imagens, links e cor exata acontece depois e não entra nesta contagem.</small>
-        </div>
+      </div>
+      <div id="previewShell" class="preview-shell mobile">
+        <div id="lpCanvas" class="lp-host"></div>
+      </div>
+    </section>
+
+    <aside class="inspector">
+      <div class="inspector-head">
+        <span class="overline">EDITOR LEVE</span>
+        <h2>Personalize a LP</h2>
+        <p>Todo texto do HTML é editável. Variáveis repetidas, como o nome da empresa, continuam sincronizadas.</p>
+      </div>
+
+      <section id="selectedPanel" class="inspect-card">
+        <h3>Elemento selecionado</h3>
+        <p class="muted">Toque em qualquer texto, botão, logo ou imagem no preview.</p>
       </section>
 
-      <section class="wizard-card">
-        <div class="progress-head">
-          <span id="stepLabel">Campo 1 de 10</span>
-          <span id="pathLabel">0/10 definidos</span>
-        </div>
-        <div class="progress-track"><div id="progressBar"></div></div>
-
-        <div class="question-head">
-          <span id="questionKind" class="overline"></span>
-          <h2 id="questionTitle"></h2>
-          <p id="questionHelp"></p>
-        </div>
-
-        <div id="options" class="option-grid"></div>
-
-        <div id="colorFineTune" class="color-fine hidden">
-          <div class="color-fine-copy">
-            <strong>Ajuste fino da cor</strong>
-            <span>Escolha uma das 10 famílias acima para definir o caminho. Depois arraste o seletor ou digite um HEX. Essa cor exata é personalização adicional.</span>
-          </div>
-          <div class="color-tools">
-            <input id="colorPicker" type="color" aria-label="Selecionar cor">
-            <input id="hexInput" type="text" maxlength="7" inputmode="text" aria-label="Cor em hexadecimal" placeholder="#6D28D9">
-            <div id="palettePreview" class="palette-preview" aria-label="Paleta automática"></div>
-          </div>
-        </div>
-
-        <div class="wizard-foot">
-          <button id="prevBtn" class="ui-btn">Voltar</button>
-          <button id="nextBtn" class="ui-btn primary">Continuar</button>
-        </div>
+      <section class="inspect-card">
+        <h3>Variáveis compartilhadas</h3>
+        <label>Nome da empresa<input data-global="companyName" type="text"></label>
+        <label>Telefone / WhatsApp<input data-global="phone" type="text"></label>
+        <label>Cidade / região<input data-global="city" type="text"></label>
       </section>
 
-      <div id="pathChips" class="path-chips"></div>
-    </main>
-
-    <main id="editorView" class="editor hidden">
-      <aside class="inspector">
-        <div class="inspector-head">
-          <div>
-            <span class="overline">EDITOR LEVE</span>
-            <h2>Personalize o preview</h2>
-          </div>
-          <p>Clique em texto, botão, logo ou imagem. Elementos com a mesma variável são sincronizados automaticamente.</p>
-        </div>
-
-        <section id="selectedPanel" class="inspect-card">
-          <h3>Elemento selecionado</h3>
-          <p class="muted">Clique em algo editável no preview.</p>
-        </section>
-
-        <section class="inspect-card">
-          <h3>Variáveis compartilhadas</h3>
-          <label>Nome da empresa<input data-global="companyName" type="text"></label>
-          <label>Telefone / WhatsApp<input data-global="phone" type="text"></label>
-          <label>Cidade / região<input data-global="city" type="text"></label>
-        </section>
-
-        <section class="inspect-card">
-          <h3>Cor principal</h3>
-          <div class="editor-color-row">
-            <input id="editorColorPicker" type="color" aria-label="Selecionar cor">
-            <input id="editorHexInput" type="text" maxlength="7" aria-label="Cor em hexadecimal">
-          </div>
-          <div id="editorPalette" class="palette-preview"></div>
-          <p class="muted tiny">O sistema recalcula automaticamente contraste, fundo suave, tom escuro e cor complementar.</p>
-        </section>
-
-        <section class="inspect-card">
-          <h3>Assinatura do caminho</h3>
-          <div id="configSummary" class="config-summary"></div>
-        </section>
-      </aside>
-
-      <section class="preview-zone">
-        <div class="preview-toolbar">
-          <div>
-            <strong>Preview ao vivo</strong>
-            <span>mobile-first</span>
-          </div>
-          <div class="device-switch">
-            <button data-device="mobile" class="active" aria-label="Visualizar em celular">Celular</button>
-            <button data-device="tablet" aria-label="Visualizar em tablet">Tablet</button>
-            <button data-device="desktop" aria-label="Visualizar em desktop">Desktop</button>
-          </div>
-        </div>
-        <div id="previewShell" class="preview-shell mobile">
-          <div id="lpCanvas"></div>
-        </div>
+      <section class="inspect-card">
+        <h3>Cor da página</h3>
+        <div id="editorColorWheel" class="color-wheel-mount compact"></div>
+        <div id="editorPalette" class="palette-preview"></div>
+        <p class="muted tiny">A alteração é aplicada sem reconstruir o HTML; portanto textos já editados não são perdidos.</p>
       </section>
-    </main>
-  </div>
 
-  <script src="./app.js"></script>
+      <section class="inspect-card">
+        <h3>Assinatura do caminho</h3>
+        <div id="configSummary" class="config-summary"></div>
+      </section>
+    </aside>
+  </main>
+</div>
+<script src="./app.js"></script>
 </body>
 </html>
