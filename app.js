@@ -527,7 +527,34 @@ function runIntegrityTests(contextCount=120){
   return {ok:results.every(r=>r.ok),results,contexts:contextCount};
 }
 
-global.LP10B_CORE={FIELDS,COLOR_OPTIONS,OVERRIDES,DEFAULTS,optionsFor,labelFor,labelsFor,palette,renderPage,renderFieldContribution,stripEditorMetadata,visibleFingerprint,visibleTextFingerprint,runIntegrityTests,deterministicContexts};
+function decorateAllTextEditable(root){
+  if(!root||typeof document==='undefined'||typeof NodeFilter==='undefined')return 0;
+  let id=0;
+  root.querySelectorAll('a[href]').forEach((a,i)=>{if(!a.hasAttribute('data-link-var'))a.dataset.freeLink='l'+(i+1)});
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{
+    acceptNode(node){
+      if(!node.nodeValue||!node.nodeValue.trim())return NodeFilter.FILTER_REJECT;
+      const p=node.parentElement;if(!p)return NodeFilter.FILTER_REJECT;
+      if(p.closest('[data-var]'))return NodeFilter.FILTER_REJECT;
+      if(p.closest('[data-free-text]'))return NodeFilter.FILTER_REJECT;
+      if(['SCRIPT','STYLE','NOSCRIPT'].includes(p.tagName))return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(node=>{
+    const span=document.createElement('span');
+    span.dataset.freeText='t'+(++id);
+    span.className='lp-editable lp-free-text';
+    span.contentEditable='true';
+    span.spellcheck=true;
+    span.textContent=node.nodeValue;
+    node.parentNode.replaceChild(span,node);
+  });
+  return id;
+}
+
+global.LP10B_CORE={FIELDS,COLOR_OPTIONS,OVERRIDES,DEFAULTS,optionsFor,labelFor,labelsFor,palette,renderPage,renderFieldContribution,stripEditorMetadata,visibleFingerprint,visibleTextFingerprint,runIntegrityTests,deterministicContexts,decorateAllTextEditable};
 
 if(!global.document||!document.getElementById('wizardView'))return;
 
@@ -660,30 +687,7 @@ function leaveEditor(){
   document.getElementById('downloadBtn').classList.add('hidden');
   showColorStage();
 }
-function makeAllTextEditable(root){
-  let id=0;
-  root.querySelectorAll('a[href]').forEach((a,i)=>{if(!a.hasAttribute('data-link-var'))a.dataset.freeLink='l'+(i+1)});
-  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{
-    acceptNode(node){
-      if(!node.nodeValue||!node.nodeValue.trim())return NodeFilter.FILTER_REJECT;
-      const p=node.parentElement;if(!p)return NodeFilter.FILTER_REJECT;
-      if(p.closest('[data-var]'))return NodeFilter.FILTER_REJECT;
-      if(p.closest('[data-free-text]'))return NodeFilter.FILTER_REJECT;
-      if(['SCRIPT','STYLE','NOSCRIPT'].includes(p.tagName))return NodeFilter.FILTER_REJECT;
-      return NodeFilter.FILTER_ACCEPT;
-    }
-  });
-  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-  nodes.forEach(node=>{
-    const span=document.createElement('span');
-    span.dataset.freeText='t'+(++id);
-    span.className='lp-editable lp-free-text';
-    span.contentEditable='true';
-    span.spellcheck=true;
-    span.textContent=node.nodeValue;
-    node.parentNode.replaceChild(span,node);
-  });
-}
+function makeAllTextEditable(root){return decorateAllTextEditable(root)}
 function renderPreview(reset){
   const cfg=state.config.map(v=>v==null?0:v);
   if(reset)state.variables=createVariables(cfg);
