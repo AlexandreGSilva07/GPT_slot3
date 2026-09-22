@@ -596,7 +596,6 @@ function enterEditor(){
   document.getElementById('wizardView').classList.add('hidden');
   document.getElementById('editorView').classList.remove('hidden');
   document.getElementById('backBtn').classList.remove('hidden');
-  document.getElementById('variantBtn').classList.remove('hidden');
   document.getElementById('downloadBtn').classList.remove('hidden');
   syncColorControls();renderPreview(true);
 }
@@ -604,7 +603,6 @@ function leaveEditor(){
   document.getElementById('wizardView').classList.remove('hidden');
   document.getElementById('editorView').classList.add('hidden');
   document.getElementById('backBtn').classList.add('hidden');
-  document.getElementById('variantBtn').classList.add('hidden');
   document.getElementById('downloadBtn').classList.add('hidden');
 }
 function renderPreview(reset){
@@ -692,13 +690,6 @@ document.getElementById('nextBtn').onclick=()=>{
   if(state.step<9){state.step++;renderWizard()}else enterEditor();
 };
 document.getElementById('backBtn').onclick=leaveEditor;
-document.getElementById('variantBtn').onclick=()=>{
-  // deterministic alternative: rotate the hero and depth selections, preserving explicit user answers is intentionally NOT done.
-  // This button instead re-renders exactly the same base LP to demonstrate determinism.
-  renderPreview(false);
-  document.getElementById('variantBtn').textContent='Mesma versão ✓';
-  setTimeout(()=>document.getElementById('variantBtn').textContent='Outra versão',900);
-};
 document.getElementById('downloadBtn').onclick=exportHTML;
 document.querySelectorAll('[data-device]').forEach(btn=>btn.onclick=()=>{
   document.querySelectorAll('[data-device]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
